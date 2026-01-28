@@ -1,6 +1,6 @@
 [project]
 name = "rightsize-cli"
-version = "0.1.0"
+version = "0.1.1"
 description = "Benchmark prompts against multiple LLMs via OpenRouter to find the cheapest model that works."
 readme = "README.md"
 license = {text = "MIT"}
@@ -35,6 +35,7 @@ Repository = "https://github.com/NehmeAILabs/rightsize-cli.git"
 
 [project.scripts]
 rightsize = "rightsize.cli:app"
+rightsize-cli = "rightsize.cli:app"
 
 [build-system]
 requires = ["hatchling"]

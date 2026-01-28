@@ -6,47 +6,62 @@ Stop overpaying for AI. Benchmark your prompts against 200+ models via OpenRoute
 
 This is the production-grade CLI version of the [RightSize web tool](https://nehmeailabs.com/right-size).
 
-## The Problem
+## Installation
 
-You're probably using Claude Sonnet or GPT-5 for everything. That's expensive. Many tasks work just as well with smaller, cheaper models - you just don't know which ones.
+```bash
+# Using pip
+pip install rightsize-cli
 
-## The Solution
-
-RightSize benchmarks your actual prompts against multiple models and shows you:
-- **Accuracy** - How well each model performs (judged by a strong LLM)
-- **Latency** - Response time (p95)
-- **Cost** - Projected cost per 1,000 runs
-- **Savings** - How much you save vs your baseline
+# Using uv
+uv pip install rightsize-cli
+```
 
 ## Quick Start
 
 ```bash
-# Install
-uv pip install -e .
-
 # Set your OpenRouter API key
 export RIGHTSIZE_OPENROUTER_API_KEY="sk-or-..."
 
+# List available models
+rightsize-cli models
+
 # Run a benchmark
-rightsize benchmark data/test_cases.csv \
-  --template prompts/classify.j2 \
-  --model google/gemma-3-12b-it \
-  --model mistralai/mistral-small-3.1-24b-instruct \
-  --model deepseek/deepseek-chat-v3.1 \
-  --judge google/gemini-2.5-flash \
-  --baseline google/gemini-2.5-flash
+rightsize-cli benchmark test_cases.csv \
+  -t prompt.j2 \
+  -m google/gemma-3-12b-it \
+  -m deepseek/deepseek-chat-v3.1 \
+  -j google/gemini-2.5-flash \
+  -b google/gemini-2.5-flash
 ```
 
-Output:
+### Run without installing (uvx)
+
+```bash
+# Set API key
+export RIGHTSIZE_OPENROUTER_API_KEY="sk-or-..."
+
+# List models
+uvx rightsize-cli models
+
+# Run benchmark
+uvx rightsize-cli benchmark test_cases.csv \
+  -t prompt.j2 \
+  -m google/gemma-3-12b-it \
+  -m deepseek/deepseek-chat-v3.1 \
+  -j google/gemini-2.5-flash \
+  -b google/gemini-2.5-flash
 ```
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┓
-┃ Model                                   ┃ Accuracy ┃ Latency (p95) ┃ Cost/1k  ┃ Savings  ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━┩
-│ google/gemma-3-12b-it                   │    71.0% │        4200ms │  $0.0028 │   +93.7% │
-│ mistralai/mistral-small-3.1-24b-instruct│    85.0% │        1200ms │  $0.0035 │   +92.2% │
-│ deepseek/deepseek-chat-v3.1             │    95.0% │         800ms │  $0.0180 │   +60.0% │
-│ google/gemini-2.5-flash                 │   100.0% │        1900ms │  $0.0450 │       —  │
-└─────────────────────────────────────────┴──────────┴───────────────┴──────────┴──────────┘
+
+## Output
+
+```
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┓
+┃ Model                       ┃ Accuracy ┃ Latency (p95) ┃ Cost/1k  ┃ Savings  ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━┩
+│ google/gemma-3-12b-it       │    71.0% │        4200ms │  $0.0028 │   +93.7% │
+│ deepseek/deepseek-chat-v3.1 │    95.0% │         800ms │  $0.0180 │   +60.0% │
+│ google/gemini-2.5-flash     │   100.0% │        1900ms │  $0.0450 │       —  │
+└─────────────────────────────┴──────────┴───────────────┴──────────┴──────────┘
 ```
 
 ## How It Works
@@ -85,7 +100,7 @@ The judge model compares each model's output to `expected_output` and scores:
 
 Templates wrap your inputs with instructions. Supports Jinja2 (`.j2`) or Python f-strings.
 
-**Example: Classification template** (`prompts/classify.j2`):
+**Example: Classification template** (`prompt.j2`):
 ```jinja2
 Classify this support ticket.
 
@@ -100,7 +115,7 @@ TICKET: {{ input_data }}
 OUTPUT:
 ```
 
-**Example: Extraction template** (`prompts/extract.j2`):
+**Example: Extraction template** (`extract.j2`):
 ```jinja2
 Extract the email from this text.
 
@@ -112,16 +127,6 @@ TEXT: {{ input_data }}
 OUTPUT:
 ```
 
-### When to use templates
-
-| Use Case | Template Purpose |
-|----------|------------------|
-| Classification | Define categories, enforce output format |
-| Extraction | Specify what to extract, output format |
-| Summarization | Set length constraints, style |
-| Translation | Specify target language, formality |
-| Q&A | Provide context, format requirements |
-
 ### Template variable
 
 | Variable | Description |
@@ -130,10 +135,10 @@ OUTPUT:
 
 ## CLI Reference
 
-### `rightsize benchmark`
+### `rightsize-cli benchmark`
 
 ```bash
-rightsize benchmark <csv_file> [OPTIONS]
+rightsize-cli benchmark <csv_file> [OPTIONS]
 ```
 
 | Option | Short | Default | Description |
@@ -144,13 +149,14 @@ rightsize benchmark <csv_file> [OPTIONS]
 | `--baseline` | `-b` | None | Baseline model for savings calculation |
 | `--concurrency` | `-c` | 10 | Max parallel requests |
 | `--output` | `-o` | `table` | Output format: table, json, csv |
+| `--verbose` | `-v` | False | Show detailed outputs and judge scores |
 
-### `rightsize models`
+### `rightsize-cli models`
 
 List all available models and their pricing:
 
 ```bash
-rightsize models
+rightsize-cli models
 ```
 
 ## Configuration
@@ -165,38 +171,47 @@ Set via environment variables or `.env` file:
 
 ## Examples
 
-### Support ticket classification
+### Compare cheap models against a baseline
 ```bash
-rightsize benchmark data/test_cases.csv \
-  -t prompts/classify.j2 \
-  -m google/gemma-3-12b-it \
-  -m mistralai/mistral-small-3.1-24b-instruct \
-  -m deepseek/deepseek-chat-v3.1 \
-  -j google/gemini-2.5-flash \
-  -b google/gemini-2.5-flash
-```
-
-### Find the cheapest model that works
-```bash
-rightsize benchmark data/test_cases.csv \
-  -t prompts/classify.j2 \
+uvx rightsize-cli benchmark test_cases.csv \
+  -t prompt.j2 \
   -m google/gemma-3-12b-it \
   -m google/gemma-3-27b-it \
   -m qwen/qwen3-8b \
   -m meta-llama/llama-3.3-70b-instruct \
+  -j google/gemini-2.5-flash \
+  -b google/gemini-2.5-flash
+```
+
+### Use a stronger judge model
+```bash
+uvx rightsize-cli benchmark test_cases.csv \
+  -t prompt.j2 \
+  -m google/gemma-3-12b-it \
+  -m deepseek/deepseek-chat-v3.1 \
   -j anthropic/claude-sonnet-4 \
   -b google/gemini-2.5-flash
 ```
 
 ### Export results to JSON
 ```bash
-rightsize benchmark data/test_cases.csv \
-  -t prompts/classify.j2 \
-  -m mistralai/mistral-small-3.1-24b-instruct \
+uvx rightsize-cli benchmark test_cases.csv \
+  -t prompt.j2 \
+  -m google/gemma-3-12b-it \
   -m deepseek/deepseek-chat-v3.1 \
   -j google/gemini-2.5-flash \
   -b google/gemini-2.5-flash \
   -o json > results.json
+```
+
+### Debug with verbose mode
+```bash
+uvx rightsize-cli benchmark test_cases.csv \
+  -t prompt.j2 \
+  -m google/gemma-3-12b-it \
+  -j google/gemini-2.5-flash \
+  -b google/gemini-2.5-flash \
+  -v
 ```
 
 ## Tips
@@ -207,6 +222,20 @@ rightsize benchmark data/test_cases.csv \
 4. **Set a quality bar** - Decide what accuracy % is acceptable (e.g., 95%+)
 5. **Consider latency** - Sometimes a slower cheap model isn't worth it
 6. **Iterate on prompts** - A better prompt can make cheaper models work better
+
+## Development
+
+```bash
+# Clone the repo
+git clone https://github.com/NehmeAILabs/rightsize-cli.git
+cd rightsize-cli
+
+# Install in dev mode
+uv pip install -e .
+
+# Run locally
+rightsize-cli models
+```
 
 ## License
 

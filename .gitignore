@@ -19,3 +19,5 @@ __pycache__/
 *.pywzz
 *.pyzzz
 *.pywzzz
+dist/
+.DS_Store
