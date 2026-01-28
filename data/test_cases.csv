@@ -1,0 +1,11 @@
+input_data,expected_output
+"My order #12345 hasn't arrived. It's been 2 weeks.",billing::high
+"How do I reset my password?",account::high
+"Product broke after 3 days. I want my money back.",refund::high
+"Can I upgrade to the pro plan?",subscription::high
+"Checkout page crashes on mobile.",technical::high
+"I was charged twice for the same order.",billing::high
+"How do I cancel my account?",account::high
+"The export feature isn't working.",technical::high
+"Need an invoice for tax purposes.",billing::high
+"What's included in the enterprise tier?",subscription::high
