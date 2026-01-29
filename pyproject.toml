@@ -1,6 +1,6 @@
 [project]
 name = "rightsize-cli"
-version = "0.1.2"
+version = "0.1.3"
 description = "Benchmark prompts against multiple LLMs via OpenRouter to find the cheapest model that works."
 readme = "README.md"
 license = {text = "MIT"}

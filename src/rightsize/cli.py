@@ -13,7 +13,7 @@ from rich.table import Table
 from rightsize import __version__
 from rightsize.client import OpenRouterClient
 from rightsize.config import Settings
-from rightsize.models import ModelPricing, TestCase
+from rightsize.models import BenchmarkResult, ModelPricing, TestCase
 from rightsize.output import render_results
 from rightsize.pricing import fetch_pricing
 from rightsize.runner import aggregate_results, run_benchmark, run_judging
@@ -180,7 +180,7 @@ def _open_visualizer(
     }
     compressed = zlib.compress(json.dumps(payload).encode())
     encoded = base64.urlsafe_b64encode(compressed).decode()
-    url = f"http://localhost:5173/right-size/visualize?d={encoded}"
+    url = f"https://nehmeailabs.com/right-size/visualize?d={encoded}"
     if total_rows > len(sampled_results):
         console.print(
             f"[dim]Showing a sample of {len(sampled_results)} results out of {total_rows}.[/dim]"
