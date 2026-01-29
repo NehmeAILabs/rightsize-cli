@@ -30,8 +30,17 @@ rightsize-cli benchmark test_cases.csv \
   -t prompt.j2 \
   -m google/gemma-3-12b-it \
   -m deepseek/deepseek-chat-v3.1 \
-  -j google/gemini-2.5-flash \
+  -j google/gemini-3-flash-preview \
   -b google/gemini-2.5-flash
+
+# Open interactive visualization in the browser
+rightsize-cli benchmark data/test_cases.csv \
+  -t prompts/classify.j2 \
+  -m google/gemma-3-12b-it \
+  -m deepseek/deepseek-chat-v3.1 \
+  -j google/gemini-3-flash-preview \
+  -b google/gemini-2.5-flash \
+  --visualize
 ```
 
 ### Run without installing (uvx)
@@ -48,8 +57,17 @@ uvx rightsize-cli benchmark test_cases.csv \
   -t prompt.j2 \
   -m google/gemma-3-12b-it \
   -m deepseek/deepseek-chat-v3.1 \
-  -j google/gemini-2.5-flash \
+  -j google/gemini-3-flash-preview \
   -b google/gemini-2.5-flash
+
+# Run benchmark + open web visualization
+uvx rightsize-cli benchmark test_cases.csv \
+  -t prompt.j2 \
+  -m google/gemma-3-12b-it \
+  -m deepseek/deepseek-chat-v3.1 \
+  -j google/gemini-3-flash-preview \
+  -b google/gemini-2.5-flash \
+  --visualize
 ```
 
 ## Output
@@ -150,6 +168,7 @@ rightsize-cli benchmark <csv_file> [OPTIONS]
 | `--concurrency` | `-c` | 10 | Max parallel requests |
 | `--output` | `-o` | `table` | Output format: table, json, csv |
 | `--verbose` | `-v` | False | Show detailed outputs and judge scores |
+| `--visualize` | `-V` | False | Open interactive web visualization |
 
 ### `rightsize-cli models`
 
@@ -179,7 +198,7 @@ uvx rightsize-cli benchmark test_cases.csv \
   -m google/gemma-3-27b-it \
   -m qwen/qwen3-8b \
   -m meta-llama/llama-3.3-70b-instruct \
-  -j google/gemini-2.5-flash \
+  -j google/gemini-3-flash-preview \
   -b google/gemini-2.5-flash
 ```
 
@@ -199,7 +218,7 @@ uvx rightsize-cli benchmark test_cases.csv \
   -t prompt.j2 \
   -m google/gemma-3-12b-it \
   -m deepseek/deepseek-chat-v3.1 \
-  -j google/gemini-2.5-flash \
+  -j google/gemini-3-flash-preview \
   -b google/gemini-2.5-flash \
   -o json > results.json
 ```
@@ -209,7 +228,7 @@ uvx rightsize-cli benchmark test_cases.csv \
 uvx rightsize-cli benchmark test_cases.csv \
   -t prompt.j2 \
   -m google/gemma-3-12b-it \
-  -j google/gemini-2.5-flash \
+  -j google/gemini-3-flash-preview \
   -b google/gemini-2.5-flash \
   -v
 ```

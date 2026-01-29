@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import asyncio
 import csv
+import json
 from pathlib import Path
+from datetime import datetime
 
 import typer
 from rich.console import Console
 from rich.table import Table
 
+from rightsize import __version__
 from rightsize.client import OpenRouterClient
 from rightsize.config import Settings
 from rightsize.models import ModelPricing, TestCase
@@ -29,6 +32,7 @@ def benchmark(
     concurrency: int = typer.Option(10, "--concurrency", "-c"),
     output_format: str = typer.Option("table", "--output", "-o", help="table|json|csv"),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Show detailed outputs and scores"),
+    visualize: bool = typer.Option(False, "--visualize", "-V", help="Open results in web visualizer"),
 ) -> None:
     """Benchmark prompts against multiple LLMs via OpenRouter."""
     console = Console()
@@ -101,6 +105,8 @@ def benchmark(
 
             aggregated = aggregate_results(run_results, judge_scores, pricing)
             render_results(aggregated, baseline, output_format)
+            if visualize:
+                _open_visualizer(aggregated, baseline, console)
 
     asyncio.run(_run())
 
@@ -151,3 +157,33 @@ def _render_models(pricing: dict[str, ModelPricing]) -> None:
         model_pricing = pricing[model_id]
         table.add_row(model_id, f"{model_pricing.input:.6f}", f"{model_pricing.output:.6f}")
     console.print(table)
+
+
+def _open_visualizer(
+    results: list[BenchmarkResult],
+    baseline: str | None,
+    console: Console,
+) -> None:
+    import base64
+    import zlib
+    import webbrowser
+
+    total_rows = len(results)
+    sampled_results = results[:1000]
+    payload = {
+        "results": [r.model_dump() for r in sampled_results],
+        "baseline": baseline,
+        "generated_at": datetime.utcnow().isoformat(),
+        "cli_version": __version__,
+        "total_rows": total_rows,
+        "sampled": len(sampled_results),
+    }
+    compressed = zlib.compress(json.dumps(payload).encode())
+    encoded = base64.urlsafe_b64encode(compressed).decode()
+    url = f"http://localhost:5173/right-size/visualize?d={encoded}"
+    if total_rows > len(sampled_results):
+        console.print(
+            f"[dim]Showing a sample of {len(sampled_results)} results out of {total_rows}.[/dim]"
+        )
+    console.print("[dim]Opening visualization in browser...[/dim]")
+    webbrowser.open(url)
